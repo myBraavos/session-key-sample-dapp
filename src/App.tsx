@@ -11,116 +11,233 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { StarknetWindowObject, connect } from "get-starknet";
-import { getStarknet } from "get-starknet-core";
-import { signGasSponsoredSessionRequest, getGasSponsoredSessionTx, requestSessionAccount } from "starknet-sessions";
-import { Signature, AccountInterface } from "starknet";
+import { StarknetWindowObject, connect } from "@starknet-io/get-starknet";
+import { getStarknet } from "@starknet-io/get-starknet-core";
+import {
+    signGasSponsoredSessionRequest,
+    getGasSponsoredSessionTx,
+    requestSessionAccount,
+} from "starknet-sessions";
+import { Signature, AccountInterface, RpcProvider } from "starknet";
 
 const sessionGSRequest = {
     callerAddress: "0x04a14a9ead8ad57697d76cf0ab69d209bacbbaf078963e5316b9348a860191c5",
-    sessionAccountAddress: "0x06018c5e4fa07fedee5c8ab05784ac66e45c9acabb814d313d0e31768d5f38b4",
+    sessionAccountAddress:
+        "0x06018c5e4fa07fedee5c8ab05784ac66e45c9acabb814d313d0e31768d5f38b4",
     executeAfter: new Date(0),
     executeBefore: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
     requestedMethods: [
         {
-            contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", entrypoint: "transfer", calldataValidations: [
+            contractAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "transfer",
+            calldataValidations: [
                 {
                     validationType: 0 as const,
                     offset: 0,
-                    value: "0x0089fd6febc2033fd3061b6ccfc841b9f98b5afbfea445fbcecedb1686994468"
-                }
-            ]
+                    value: "0x0089fd6febc2033fd3061b6ccfc841b9f98b5afbfea445fbcecedb1686994468",
+                },
+            ],
         },
         {
-            contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", entrypoint: "approve", calldataValidations: [
-
-            ]
+            contractAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "approve",
+            calldataValidations: [],
         },
         {
-            contractAddress: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", entrypoint: "transfer", calldataValidations: [
-            ]
+            contractAddress:
+                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+            entrypoint: "transfer",
+            calldataValidations: [],
         },
         {
-            contractAddress: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", entrypoint: "approve", calldataValidations: [
-            ]
-        }
+            contractAddress:
+                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+            entrypoint: "approve",
+            calldataValidations: [],
+        },
     ],
-    spendingLimits: [{ tokenAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", amount: { low: 10000000000000000, high: 0 } }]
-}
+    spendingLimits: [
+        {
+            tokenAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            amount: { low: 10000000000000000, high: 0 },
+        },
+    ],
+};
 
 const sessionRequest = {
     executeAfter: new Date(0),
     executeBefore: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
     strkGasLimit: "10000000000000000000",
     requestedMethods: [
-        { contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", entrypoint: "transfer" },
-        { contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", entrypoint: "approve" },
-        { contractAddress: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", entrypoint: "transfer" },
-        { contractAddress: "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d", entrypoint: "approve" }
+        {
+            contractAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "transfer",
+        },
+        {
+            contractAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            entrypoint: "approve",
+        },
+        {
+            contractAddress:
+                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+            entrypoint: "transfer",
+        },
+        {
+            contractAddress:
+                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+            entrypoint: "approve",
+        },
     ],
-    spendingLimits: [{ tokenAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", amount: { low: 10000000000000000, high: 0 } }]
-}
+    spendingLimits: [
+        {
+            tokenAddress:
+                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+            amount: { low: 10000000000000000, high: 0 },
+        },
+    ],
+};
 
 function SignComplexMessage({ address }: { address: string | undefined }) {
-    const [sessionGSRequestData, setSessionGSRequestData] = useState(JSON.stringify(address ? { ...sessionGSRequest, callerAddress: address } : sessionGSRequest, null, 2));
-    const [accountSessionRequestData, setAccountSessionRequestData] = useState(JSON.stringify(sessionRequest, null, 2));
+    const [sessionGSRequestData, setSessionGSRequestData] = useState(
+        JSON.stringify(
+            address ? { ...sessionGSRequest, callerAddress: address } : sessionGSRequest,
+            null,
+            2
+        )
+    );
+    const [accountSessionRequestData, setAccountSessionRequestData] = useState(
+        JSON.stringify(sessionRequest, null, 2)
+    );
     const [txHash, setTxHash] = useState<string | undefined>(undefined);
     const [gsSignature, setGSSignature] = useState<Signature | undefined>(undefined);
-    const [sessionAccount, setSessionAccount] = useState<AccountInterface | undefined>(undefined);
+    const [sessionAccount, setSessionAccount] = useState<AccountInterface | undefined>(
+        undefined
+    );
 
     const signGSExecSession = async () => {
         const wallet = await getStarknet().getLastConnectedWallet();
         const request = JSON.parse(sessionGSRequestData);
-        if (wallet?.isConnected && request) {
+        if (wallet && request) {
             request["executeAfter"] = new Date(request["executeAfter"]);
             request["executeBefore"] = new Date(request["executeBefore"]);
-            sessionGSRequest.sessionAccountAddress = wallet.account.address;
-            const signature = await signGasSponsoredSessionRequest(wallet.account, request, "v2")
+            const address = await wallet
+                .request({
+                    type: "wallet_requestAccounts",
+                })
+                .then(res => res[0]);
+            sessionGSRequest.sessionAccountAddress = address;
+
+            const account = {
+                getChainId: () =>
+                    wallet.request({
+                        type: "wallet_requestChainId",
+                    }),
+                signMessage: (typeData: any) =>
+                    wallet.request({
+                        type: "wallet_signTypedData",
+                        params: typeData,
+                    }),
+            };
+            const signature = await signGasSponsoredSessionRequest(
+                account as any,
+                request,
+                "v2"
+            );
             setGSSignature(signature);
         }
-    }
+    };
 
     const sendGSTransaction = async () => {
         const wallet = await getStarknet().getLastConnectedWallet();
-        if (wallet?.isConnected) {
-            const res = await getGasSponsoredSessionTx({
-                calls: [
-                    {
-                        contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-                        entrypoint: "transfer",
-                        calldata: ["0x0089fd6febc2033fd3061b6ccfc841b9f98b5afbfea445fbcecedb1686994468", 1, 0]
-                    }
-                ],
-                ...sessionGSRequest,
-                gsSessionSignature: gsSignature!,
-            }, "v2")
-            await wallet.account.execute(res);
+        if (wallet) {
+            const res = await getGasSponsoredSessionTx(
+                {
+                    calls: [
+                        {
+                            contractAddress:
+                                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+                            entrypoint: "transfer",
+                            calldata: [
+                                "0x0089fd6febc2033fd3061b6ccfc841b9f98b5afbfea445fbcecedb1686994468",
+                                1,
+                                0,
+                            ],
+                        },
+                    ],
+                    ...sessionGSRequest,
+                    gsSessionSignature: gsSignature!,
+                },
+                "v2"
+            );
+
+            await wallet.request({
+                type: "wallet_addInvokeTransaction",
+                params: {
+                    calls: [
+                        {
+                            contract_address: res.contractAddress,
+                            calldata: res.calldata as string[],
+                            entry_point: res.entrypoint,
+                        },
+                    ],
+                },
+            });
         }
-    }
+    };
 
     const generateSessionAccount = async () => {
         const wallet = await getStarknet().getLastConnectedWallet();
         const request = JSON.parse(accountSessionRequestData);
-        if (wallet?.isConnected && request) {
+        if (wallet && request) {
             request["executeAfter"] = new Date(request["executeAfter"]);
             request["executeBefore"] = new Date(request["executeBefore"]);
-            const account = await requestSessionAccount(wallet.provider, wallet.account, request)
-            setSessionAccount(account);
+            const provider = new RpcProvider({
+                nodeUrl: "https://starknet-mainnet.public.blastapi.io/rpc/v0_8",
+                specVersion: "0.8.1",
+                chainId: "0x534e5f4d41494e",
+                blockIdentifier: "pending",
+            });
+
+            const account = {
+                getChainId: () =>
+                    wallet.request({
+                        type: "wallet_requestChainId",
+                    }),
+                signMessage: (typeData: any) =>
+                    wallet.request({
+                        type: "wallet_signTypedData",
+                        params: typeData,
+                    }),
+                address,
+            };
+            const sessionAccount = await requestSessionAccount(
+                provider,
+                // @ts-ignore
+                account,
+                request
+            );
+            setSessionAccount(sessionAccount);
         }
-    }
+    };
 
     const executeSessionTx = async () => {
         if (sessionAccount) {
             const res = await sessionAccount.execute([
                 {
-                    contractAddress: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+                    contractAddress:
+                        "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
                     entrypoint: "transfer",
-                    calldata: [sessionAccount.address, 1, 0]
-                }
+                    calldata: [sessionAccount.address, 1, 0],
+                },
             ]);
             setTxHash(res.transaction_hash);
         }
-    }
+    };
 
     return (
         <Card sx={{ width: "100%" }}>
@@ -178,12 +295,15 @@ function SignComplexMessage({ address }: { address: string | undefined }) {
                         onClick={() => executeSessionTx()}>
                         {"Send Session Transaction"}
                     </Button>
-                    {
-                        txHash && 
-                        <Link href={`https://starkscan.co/tx/${txHash}`} target="_blank" rel="noopener" sx={{ color: 'primary.main', fontSize: 18 }}>
+                    {txHash && (
+                        <Link
+                            href={`https://starkscan.co/tx/${txHash}`}
+                            target="_blank"
+                            rel="noopener"
+                            sx={{ color: "primary.main", fontSize: 18 }}>
                             View Transaction
                         </Link>
-                    }
+                    )}
                 </Stack>
             </CardContent>
         </Card>
@@ -201,16 +321,28 @@ function Commands({ address }: { address: string | undefined }) {
 }
 
 function App() {
-    const [connectedWallet, setConnectedWallet] = useState<StarknetWindowObject | undefined>(undefined);
+    const [connectedWallet, setConnectedWallet] = useState<
+        (StarknetWindowObject & { address: string }) | undefined
+    >(undefined);
 
     // silently attempt to connect with a pre-authorized wallet
     useEffect(() => {
         // match the dapp with a wallet instance
         connect({ modalMode: "neverAsk" }).then(wallet => {
             // connect the dapp with the chosen wallet instance
-            wallet?.enable({ starknetVersion: "v4" }).then(() => {
-                setConnectedWallet(wallet);
-            });
+            if (wallet) {
+                getStarknet()
+                    .enable(wallet)
+                    .then(w => {
+                        w.request({
+                            type: "wallet_requestAccounts",
+                        })
+                            .then(res => res[0])
+                            .then(address => {
+                                setConnectedWallet({ ...w, address });
+                            });
+                    });
+            }
         });
     }, []);
 
@@ -218,11 +350,21 @@ function App() {
         getStarknet()
             .getLastConnectedWallet()
             .then(wallet => {
-                if (!wallet?.isConnected) {
-                    setConnectedWallet(undefined);
+                if (wallet) {
+                    getStarknet()
+                        .enable(wallet)
+                        .then(w => {
+                            w.request({
+                                type: "wallet_requestAccounts",
+                            })
+                                .then(res => res[0])
+                                .then(address => {
+                                    setConnectedWallet({ ...w, address });
+                                });
+                        });
                 }
             });
-    });
+    }, []);
 
     return !connectedWallet ? (
         <Stack sx={{ padding: 5 }} direction={"column"} justifyContent={"center"}>
@@ -244,9 +386,17 @@ function App() {
                                 include: ["braavos"],
                             }).then(wallet => {
                                 if (wallet) {
-                                    wallet.enable({ starknetVersion: "v4" }).then(() => {
-                                        setConnectedWallet(wallet!);
-                                    });
+                                    getStarknet()
+                                        .enable(wallet)
+                                        .then(w => {
+                                            w.request({
+                                                type: "wallet_requestAccounts",
+                                            })
+                                                .then(res => res[0])
+                                                .then(address => {
+                                                    setConnectedWallet({ ...w, address });
+                                                });
+                                        });
                                 }
                             });
                         } catch (err) {
@@ -258,7 +408,7 @@ function App() {
             </Box>
         </Stack>
     ) : (
-        <Commands address={connectedWallet.selectedAddress} />
+        <Commands address={connectedWallet.address} />
     );
 }
 
